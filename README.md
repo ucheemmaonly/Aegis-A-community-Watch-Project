@@ -1,12 +1,11 @@
-# Community Watch
+# Aegis- A Community Watch Project
 
 A frontend-only React application for neighborhood safety: residents report and
 track incidents, patrol officers log shifts, and admins broadcast safety alerts.
-Built as a Frontend Engineering Program project.
+Built as Part of my Frontend Development Program project at RAD5 TECH HUB.
 
 ## Purpose
-
-Community Watch gives a neighborhood one calm, trustworthy, well-organized place to:
+Aegis gives a neighborhood one calm, trustworthy, well-organized place to:
 
 - report and browse incidents (theft, vandalism, hazards, and more)
 - confirm reports via upvotes and comments
@@ -15,15 +14,13 @@ Community Watch gives a neighborhood one calm, trustworthy, well-organized place
 
 ## Technologies used
 
-- **React** (function components + hooks)
-- **JavaScript** (no TypeScript)
-- **Vite** -- build tool / dev server
-- **npm** -- package manager
-- **React Router** (`react-router`, *not* `react-router-dom`) -- `createBrowserRouter`
-- **Tailwind CSS v4** (via `@tailwindcss/vite`) -- utility-first styling
-- **Fetch API** -- all network requests, no HTTP client library
-
-No Redux, no TypeScript, no other UI framework.
+- **React** 
+- **JavaScript**
+- **Vite** 
+- **npm** 
+- **React Router** 
+- **Tailwind CSS v4
+- **Fetch API** 
 
 ## API used
 
@@ -100,40 +97,7 @@ authorized for.
   `critical/emergency -> red`, `warning -> amber`, `info -> blue`,
   `success/resolved -> green` -- always paired with a text label, never color alone.
 
-## Setup instructions
 
-```bash
-git clone <this-repo>
-cd community-watch
-npm install
-```
-
-## npm commands
-
-| Command           | Purpose                              |
-|--------------------|---------------------------------------|
-| `npm run dev`      | Start the local dev server (Vite)     |
-| `npm run build`    | Production build -> `dist/`           |
-| `npm run preview`  | Preview the production build locally  |
-| `npm run lint`     | Lint the project                      |
-
-## Deployment instructions
-
-This is a static SPA (Vite build output in `dist/`). It can be deployed to
-any static host, e.g.:
-
-**Vercel**
-```bash
-npm i -g vercel
-vercel --prod
-```
-
-**Netlify**
-```bash
-npm run build
-# drag-and-drop the dist/ folder into Netlify, or:
-netlify deploy --prod --dir=dist
-```
 
 ## A note on the httpOnly cookie across origins
 
@@ -163,16 +127,4 @@ rule) so deep links like `/incidents/123` work on refresh.
 No environment variables are required -- the API base URL is a public,
 same-for-everyone constant in `src/lib/api.js`.
 
-## Known limitations
 
-- Image upload for incident reports is not implemented (the `images` field
-  accepts a list of URLs from the API, but there's no file-upload UI yet).
-- Location fields are plain text (address / zone); there's no interactive map
-  or geolocation picker.
-- Patrol shift history has no pagination -- long histories render in a single
-  list.
-- No push/real-time updates; incident, patrol, and alert data refreshes on
-  navigation/action rather than via websockets or polling.
-- Admin registration is intentionally not exposed in the UI (per the project
-  brief); admin/patrol_officer accounts must be created directly against the
-  API or provisioned by the backend team.
