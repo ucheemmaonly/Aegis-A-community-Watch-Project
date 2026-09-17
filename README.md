@@ -19,7 +19,7 @@ Aegis gives a neighborhood one calm, trustworthy, well-organized place to:
 - **Vite** 
 - **npm** 
 - **React Router** 
-- **Tailwind CSS v4
+- **Tailwind CSS v4**
 - **Fetch API** 
 
 ## API used
