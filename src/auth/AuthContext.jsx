@@ -5,17 +5,26 @@ import {
   useEffect,
   useState,
 } from "react";
-import { api, apiFetch } from "../lib/api.js";
+import { api, apiFetch, getToken, setToken, clearToken } from "../lib/api.js";
 
 const AuthContext = createContext(null);
 
+function extractToken(res) {
+  if (!res || typeof res !== "object") return null;
+  return res.token || res.accessToken || res.jwt || null;
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // true until the initial /auth/me check resolves
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const refreshUser = useCallback(async () => {
     try {
+      if (!getToken()) {
+        setUser(null);
+        return null;
+      }
       const me = await apiFetch(
         "/auth/me",
         { method: "GET" },
@@ -25,6 +34,7 @@ export function AuthProvider({ children }) {
       return me?.user ?? me ?? null;
     } catch (err) {
       if (err.status === 401) {
+        clearToken();
         setUser(null);
         return null;
       }
@@ -50,8 +60,9 @@ export function AuthProvider({ children }) {
   const login = useCallback(
     async ({ email, password }) => {
       setError(null);
-      await api.post("/auth/login", { email, password });
-
+      const res = await api.post("/auth/login", { email, password });
+      const token = extractToken(res);
+      if (token) setToken(token);
       const me = await refreshUser();
       return me;
     },
@@ -61,7 +72,9 @@ export function AuthProvider({ children }) {
   const register = useCallback(
     async (payload) => {
       setError(null);
-      await api.post("/auth/register", payload);
+      const res = await api.post("/auth/register", payload);
+      const token = extractToken(res);
+      if (token) setToken(token);
       const me = await refreshUser();
       return me;
     },
@@ -72,6 +85,7 @@ export function AuthProvider({ children }) {
     try {
       await api.post("/auth/logout");
     } finally {
+      clearToken();
       setUser(null);
     }
   }, []);

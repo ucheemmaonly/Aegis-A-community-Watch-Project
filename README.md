@@ -30,27 +30,26 @@ OpenAPI spec: `https://1-community-watch-api.vercel.app/openapi.json`
 
 ## Authentication method
 
-**httpOnly session cookie** (`community_watch_token`), *not* a frontend-managed JWT.
+**JWT Bearer token** stored in `localStorage`, sent via `Authorization: Bearer`
+header on every request.
 
-- The backend sets an httpOnly cookie on register/login. The browser stores and
-  sends it automatically; JavaScript never reads or writes it.
-- Every request to the API is sent with `credentials: "include"`.
-- On app startup, `AuthContext` calls `GET /auth/me` to determine whether a
-  session already exists (this is what makes the session survive a page
-  refresh). A loading state is shown until this check resolves, so a refresh
-  on a protected page never causes a false "logged out" redirect.
-- Logout calls `POST /auth/logout`, which clears the cookie server-side; the
-  frontend only clears its own React state.
+- On register/login the API returns a JWT token in its response body. The
+  frontend stores it in `localStorage` and attaches it to every subsequent
+  request as an `Authorization: Bearer <token>` header.
+- On app startup `AuthContext` checks for a stored token and calls
+  `GET /auth/me` to hydrate user state. A loading spinner is shown until this
+  check resolves, so a page refresh never causes a false "logged out" redirect.
+- Logout calls `POST /auth/logout` and clears the token from `localStorage`.
 
-### Why httpOnly cookies instead of a frontend-stored JWT
+### Why JWT bearer instead of httpOnly cookie
 
-- The token is never exposed to JavaScript, which meaningfully reduces XSS
-  token-theft risk compared to `localStorage`/`sessionStorage`.
-- The browser handles attaching/expiring the cookie, so there's no manual
-  token bookkeeping, refresh logic, or risk of stale tokens lingering in
-  storage.
-- It matches how a real production session-based web app is typically built,
-  which was an explicit project requirement.
+The API supports both cookie auth and JWT bearer auth. Cookie auth works
+seamlessly in development (the Vite dev server proxies requests to make them
+same-origin), but **fails in production** when the frontend and API are on
+different origins unless the server sets `SameSite=None; Secure` on the cookie.
+Since the API is a third-party service we don't control, JWT bearer auth is the
+reliable choice for a deployed frontend — the token travels in a header, so
+cross-origin restrictions don't apply.
 
 The frontend hides UI it knows a role can't use (for a cleaner experience),
 but the backend remains the authority: 401/403 responses are always handled
@@ -79,7 +78,7 @@ authorized for.
   preview, and an active-alerts preview — the default landing spot right
   after login/register
 - Client-side navigation throughout via React Router `<Link>`, no full page reloads
-- Register / Login / Logout via httpOnly cookie session
+- Register / Login / Logout via JWT bearer token
 - Session restoration on refresh (`GET /auth/me`) with a proper loading state
 - Protected routes (`/profile`, `/incidents`, `/incidents/:id`, `/report`,
   `/alerts`, `/patrols`) that wait for auth to initialize before redirecting
@@ -99,25 +98,24 @@ authorized for.
 
 
 
-## A note on the httpOnly cookie across origins
+## A note on cross-origin API calls
 
 The API lives on `1-community-watch-api.vercel.app`, a different origin from
-wherever this frontend runs. Cross-site cookies are only stored by the
-browser when they're `SameSite=None; Secure`, and `Secure` cookies require
-**HTTPS**. That has two practical consequences:
+wherever this frontend runs. Using JWT bearer auth (an `Authorization` header)
+avoids the cross-origin cookie restrictions entirely — the token is attached
+manually to each request and doesn't depend on browser cookie policies.
 
-- **Local development** (`npm run dev`, plain `http://localhost`): the dev
-  server proxies all `/api/v1/*` requests to the real API (see
-  `vite.config.js`), so the browser sees everything as same-origin and the
-  cookie is stored normally. No extra setup needed.
-- **Production**: deploy the built frontend to an **HTTPS** domain (any of
-  the hosts below already do this). As long as the site is served over
-  HTTPS, the cross-site `Secure` cookie will be accepted normally — no proxy
-  needed once both sides are on HTTPS.
+- **Local development** (`npm run dev`): the dev server proxies all
+  `/api/v1/*` requests to the real API (see `vite.config.js`), so CORS is
+  never an issue during development.
+- **Production**: the `Authorization` header is sent directly to the API's
+  absolute URL. As long as the API accepts cross-origin bearer requests (it
+  does), this works on any HTTPS host without additional configuration.
 
-If login ever appears to succeed (200) but you stay logged out, check
-DevTools → Application → Cookies for `community_watch_token`. Its absence
-almost always means the current origin is `http://` rather than `https://`.
+If login appears to succeed but you stay logged out, check DevTools →
+Application → Local Storage for the `cw_token` key. Its absence means the
+token wasn't extracted from the login response — inspect the Network tab to
+see the actual response shape.
 
 Because this is a client-side-routed SPA, configure your host to rewrite all
 unmatched paths to `/index.html` (Vercel and Netlify both do this

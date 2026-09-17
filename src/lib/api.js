@@ -2,6 +2,20 @@ const BASE = import.meta.env.DEV
   ? "/api/v1"
   : "https://1-community-watch-api.vercel.app/api/v1";
 
+const TOKEN_KEY = "cw_token";
+
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setToken(token) {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
 export class ApiError extends Error {
   constructor(message, { status, details } = {}) {
     super(message);
@@ -55,15 +69,20 @@ export async function apiFetch(path, options = {}, config = {}) {
   const isFormData =
     typeof FormData !== "undefined" && body instanceof FormData;
 
+  const token = getToken();
+  const authHeaders = token
+    ? { Authorization: `Bearer ${token}` }
+    : {};
+
   let response;
   try {
     response = await fetch(`${BASE}${path}`, {
       ...rest,
       method,
-      credentials: "include", // let the browser send/receive the httpOnly cookie
       headers: {
         ...(isFormData ? {} : { "Content-Type": "application/json" }),
         Accept: "application/json",
+        ...authHeaders,
         ...headers,
       },
       body: body == null ? undefined : isFormData ? body : JSON.stringify(body),
@@ -81,11 +100,12 @@ export async function apiFetch(path, options = {}, config = {}) {
     try {
       data = JSON.parse(text);
     } catch {
-      data = null; // non-JSON body; keep going, we still have response.status
+      data = null;
     }
   }
 
   if (response.status === 401 && config.on401 !== false) {
+    clearToken();
     throw new ApiError(messageForStatus(401, data), {
       status: 401,
       details: data,
