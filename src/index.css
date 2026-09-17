@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Warm, calm neutral surface palette (design inspiration) */
+  --color-cream-50: #fbf8f3;
+  --color-cream-100: #f5efe5;
+  --color-cream-200: #ece2d0;
+  --color-cream-300: #ddccae;
+
+  /* Deep espresso -- header / hero / footer */
+  --color-espresso-950: #201510;
+  --color-espresso-900: #2a1d16;
+  --color-espresso-800: #3a2a20;
+  --color-espresso-700: #4d3a2c;
+  --color-espresso-600: #6b5443;
+
+  /* Accent -- primary actions, links, nav.
+     Pulled from the design inspiration's own warm brown/cream palette
+     (a richer mahogany brown) instead of an unrelated hue, so it reads
+     as part of the same system while still staying clearly distinct
+     from the red/amber/blue/green severity colors. */
+  --color-accent-50: #f8f1ea;
+  --color-accent-100: #ecdbc8;
+  --color-accent-400: #b97a45;
+  --color-accent-500: #9c5f30;
+  --color-accent-600: #7a4a26;
+  --color-accent-700: #5c371c;
+
+  /* Severity -- consistent meaning across the whole app */
+  --color-severity-critical: #dc2626;
+  --color-severity-emergency: #991b1b;
+  --color-severity-warning: #d97706;
+  --color-severity-info: #2563eb;
+  --color-severity-success: #16a34a;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-cream-50);
+  color: var(--color-espresso-950);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-600);
+  outline-offset: 2px;
+}
+
+::selection {
+  background-color: var(--color-cream-300);
+}
