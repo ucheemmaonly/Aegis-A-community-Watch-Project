@@ -1,6 +1,4 @@
 # Aegis- A Community Watch Project
- Aegis means a powerful shield or protection and why i implemented the name was because it sounds strong and and it is a shield meaning,
-It is a bold name that comforts neighbors and warns criminals and Aegis acts as an unbreakable barrier to protect the neighborhood.
 
 A frontend-only React application for neighborhood safety: residents report and
 track incidents, patrol officers log shifts, and admins broadcast safety alerts.
@@ -21,7 +19,7 @@ Aegis gives a neighborhood one calm, trustworthy, well-organized place to:
 - **Vite** 
 - **npm** 
 - **React Router** 
-- **Tailwind CSS v4
+- **Tailwind CSS v4**
 - **Fetch API** 
 
 ## API used
