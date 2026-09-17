@@ -117,10 +117,9 @@ Application → Local Storage for the `cw_token` key. Its absence means the
 token wasn't extracted from the login response — inspect the Network tab to
 see the actual response shape.
 
-Because this is a client-side-routed SPA, configure your host to rewrite all
-unmatched paths to `/index.html` (Vercel and Netlify both do this
-automatically for Vite projects; for other hosts add an equivalent rewrite
-rule) so deep links like `/incidents/123` work on refresh.
+Because this is a client-side-routed SPA, the host must rewrite all unmatched
+paths to `/index.html`. This is configured in `netlify.toml` and
+`public/_redirects` so deep links like `/incidents/123` work on refresh.
 
 No environment variables are required -- the API base URL is a public,
 same-for-everyone constant in `src/lib/api.js`.
